@@ -3,6 +3,8 @@ import urllib.request
 import requests
 import re
 import os
+import io
+import pandas as pd
 
 html_page = urllib.request.urlopen("https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases")
 base_url = 'https://data.humdata.org/'
@@ -19,7 +21,13 @@ for file_name in soup.findAll('a', attrs={'title': re.compile(".csv")}):
 
 # print(repr(filenames))
 counter = 0
+# for link in soup.findAll('a', attrs={'href': re.compile(".csv")}):
+#     with urllib.request.urlopen(base_url + link.get('href')) as testfile, open(filenames[counter], 'w') as f:
+#         f.write(testfile.read().decode())
+#     counter += 1
+
 for link in soup.findAll('a', attrs={'href': re.compile(".csv")}):
-    with urllib.request.urlopen(base_url + link.get('href')) as testfile, open(filenames[counter], 'w') as f:
-        f.write(testfile.read().decode())
-    counter += 1
+    s = requests.get(base_url + link.get('href')).content
+    c = pd.read_csv(io.StringIO(s.decode('utf8')))
+    print(c)
+    
